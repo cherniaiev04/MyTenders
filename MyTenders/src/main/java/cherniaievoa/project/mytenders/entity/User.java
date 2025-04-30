@@ -35,6 +35,17 @@ public class User {
   @ManyToMany(mappedBy = "users")
   private Set<Project> projects;
 
+  public User(String username, String password, String name, String surname, String position, Role role) {
+    this.username = username;
+    this.password = password;
+    this.name = name;
+    this.surname = surname;
+    this.position = position;
+    this.role = role;
+  }
+
+  public User() {
+  }
 
   public Long getId() {
     return id;
