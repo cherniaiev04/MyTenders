@@ -14,19 +14,19 @@ function LoginPage() {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-            if(username === "admin" && password === "admin") {
-                const userInfo = {
-                    isAuthenticated: true,
-                    username: 'admin',
-                    role: 'ADMIN',
-                    name: 'admin',
-                    surname: 'admin'
-                }
-                setAuth(userInfo);
-                localStorage.setItem('userInfo', JSON.stringify(userInfo));
-                navigate('/admin');
-            } else {
-                axios.post(`${URL}/login`, { username, password })
+        if (username === "admin" && password === "admin") {
+            const userInfo = {
+                isAuthenticated: true,
+                username: 'admin',
+                role: 'ADMIN',
+                name: 'admin',
+                surname: 'admin'
+            }
+            setAuth(userInfo);
+            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            navigate('/admin');
+        } else {
+            axios.post(`${URL}/login`, { username, password }, { withCredentials: true })
                 .then(response => {
                     const userInfo = {
                         isAuthenticated: true,
@@ -34,16 +34,16 @@ function LoginPage() {
                         role: response.data.role,
                         name: response.data.name,
                         surname: response.data.surname
-                };
-                localStorage.removeItem('userInfo');
-                setAuth(userInfo);
-                localStorage.setItem('userInfo', JSON.stringify(userInfo));
-                navigate('/projects'); // Navigate to the protected route)
+                    };
+                    localStorage.removeItem('userInfo');
+                    setAuth(userInfo);
+                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                    navigate('/projects'); // Navigate to the protected route)
                 })
                 .catch(err => {
                     console.error(err);
-                }); 
-            }    
+                });
+        }
     }
 
     return (

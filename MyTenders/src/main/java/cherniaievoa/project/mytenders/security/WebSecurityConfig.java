@@ -13,6 +13,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -41,11 +46,25 @@ public class WebSecurityConfig {
   }
 
   @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(List.of("http://localhost:5173")); // frontend origin
+    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(List.of("*"));
+    configuration.setAllowCredentials(true); // ✅ Allow sending cookies
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+  }
+
+  @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     // Updated configuration for Spring Security 6.x
     http
             .csrf(csrf -> csrf.disable()) // Disable CSRF
-            .cors(cors -> cors.disable()) // Disable CORS (or configure if needed)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            //.cors(cors -> cors.disable())
             .exceptionHandling(exceptionHandling ->
                     exceptionHandling.authenticationEntryPoint(unauthorizedHandler)
             )
@@ -54,7 +73,9 @@ public class WebSecurityConfig {
             )
             .authorizeHttpRequests(authorizeRequests ->
                     authorizeRequests
-                            .requestMatchers("/login","/admin/addUser", "/api/test/all").permitAll() // Use 'requestMatchers' instead of 'antMatchers'
+                            .requestMatchers("/admin/addUser", "/admin/test").hasRole("MANAGER") // Only ADMIN only
+                            .requestMatchers("/projects/add", "/projects", "/projects/{id}/**", "/materials", "/materials/**", "/providers/**").hasAnyAuthority("MANAGER", "DIRECTOR") // Access have only MANAGER or DIRECTOR role users
+                            .requestMatchers("/login", "/api/test/all").permitAll() // Use 'requestMatchers' instead of 'antMatchers'
                             .anyRequest().authenticated()
             );
     // Add the JWT Token filter before the UsernamePasswordAuthenticationFilter

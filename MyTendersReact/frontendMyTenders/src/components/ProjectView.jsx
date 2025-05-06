@@ -170,10 +170,10 @@ function ProjectView() {
   const [materialAmount, setMaterialAmount] = useState('');
   const navigate = useNavigate();
   const URL = import.meta.env.VITE_API_URL;
-  const {auth, setAuth} = useAuth();
+  const { auth, setAuth } = useAuth();
 
   useEffect(() => {
-    axios.get(`${URL}/projects/${id}`)
+    axios.get(`${URL}/projects/${id}`, { withCredentials: true })
       .then(res => {
         console.log('Project:', res.data);
         setProject(res.data);
@@ -183,7 +183,7 @@ function ProjectView() {
         console.error(err);
       });
 
-    axios.get(`${URL}/projects/${id}/materials`)
+    axios.get(`${URL}/projects/${id}/materials`, { withCredentials: true })
       .then(res => {
         console.log('Materials:', res.data);
         setMaterials(res.data); // Ensure materials is set to an array
@@ -192,7 +192,7 @@ function ProjectView() {
         console.error(err);
       });
 
-    axios.get(`${URL}/materials`) // Fetch all materials
+    axios.get(`${URL}/materials`, { withCredentials: true }) // Fetch all materials
       .then(response => {
         console.log('All materials:', response.data);
         setAllMaterials(Array.isArray(response.data) ? response.data : []); // Ensure allMaterials is set to an array
@@ -201,7 +201,7 @@ function ProjectView() {
         console.error('Error fetching materials:', error);
       });
 
-    axios.get(`${URL}/projects/${id}/users`) // Adjust the URL as necessary
+    axios.get(`${URL}/projects/${id}/users`, { withCredentials: true }) // Adjust the URL as necessary
       .then(response => {
         console.log('Users:', response.data);
         setUsers(Array.isArray(response.data) ? response.data : []); // Ensure users is set to an array
@@ -255,7 +255,7 @@ function ProjectView() {
 
   const handleAddUser = () => {
     if (selectedUser) {
-      axios.post(`${URL}/projects/${id}/addUser`, { userId: selectedUser.id }) // Adjust the URL as necessary
+      axios.post(`${URL}/projects/${id}/addUser`, { userId: selectedUser.id }, { withCredentials: true }) // Adjust the URL as necessary
         .then(response => {
           console.log('User added:', response.data);
           setProjectUsers(prev => [...prev, selectedUser]);
@@ -270,7 +270,7 @@ function ProjectView() {
   };
 
   const handleDeleteUser = (userId) => {
-    axios.post(`${URL}/projects/${id}/deleteUser/${userId}`) // Adjust the URL as necessary
+    axios.post(`${URL}/projects/${id}/deleteUser/${userId}`, { withCredentials: true }) // Adjust the URL as necessary
       .then(response => {
         console.log('User removed:', response.data);
         setProjectUsers(prev => prev.filter(user => user.id !== userId));
@@ -282,7 +282,7 @@ function ProjectView() {
 
   const handleAddMaterial = () => {
     if (selectedMaterial && materialAmount <= selectedMaterial.amount && selectedMaterial.amount >= 1 && materialAmount >= selectedMaterial.amount * -1) {
-      axios.post(`${URL}/projects/${id}/addMaterial`, { materialId: selectedMaterial.id, amount: materialAmount }) // Adjust the URL as necessary
+      axios.post(`${URL}/projects/${id}/addMaterial`, { materialId: selectedMaterial.id, amount: materialAmount }, { withCredentials: true }) // Adjust the URL as necessary
         .then(response => {
           console.log('Material added:', response.data);
           window.location.reload();
@@ -296,7 +296,7 @@ function ProjectView() {
   };
 
   const handleDeleteMaterial = (materialId) => {
-    axios.post(`${URL}/projects/${id}/deleteMaterial/${materialId}`) // Adjust the URL as necessary
+    axios.post(`${URL}/projects/${id}/deleteMaterial/${materialId}`, { withCredentials: true }) // Adjust the URL as necessary
       .then(response => {
         console.log('Material removed:', response.data);
         setMaterials(prev => prev.filter(m => m.material.id !== materialId));
@@ -313,7 +313,7 @@ function ProjectView() {
   };
 
   const saveProject = () => {
-    axios.put(`${URL}/projects/${id}/update`, project)
+    axios.put(`${URL}/projects/${id}/update`, project, { withCredentials: true })
       .then(res => {
         console.log('Project updated:', res.data);
         // Handle success (e.g., show a success message)
@@ -325,7 +325,7 @@ function ProjectView() {
   };
 
   const deleteProject = (e) => {
-    axios.delete(`${URL}/projects/${id}/delete`)
+    axios.delete(`${URL}/projects/${id}/delete`, { withCredentials: true })
       .then(res => {
         console.log('Project deleted', res.data);
         navigate('/projects');
@@ -449,14 +449,14 @@ function ProjectView() {
             </Grid>
           </Grid>
           {auth.role === 'DIRECTOR' || auth.role === 'MANAGER' ? (
-          <Grid>
-            <Button variant="contained" color="primary" onClick={saveProject} sx={{ marginTop: 2 }}>
-              Зберегти
-            </Button>
-            <Button variant="contained" color="error" onClick={deleteProject} startIcon={<DeleteIcon />} sx={{ marginTop: 2, marginLeft: 2 }}>
-              Видалити
-            </Button>
-          </Grid>
+            <Grid>
+              <Button variant="contained" color="primary" onClick={saveProject} sx={{ marginTop: 2 }}>
+                Зберегти
+              </Button>
+              <Button variant="contained" color="error" onClick={deleteProject} startIcon={<DeleteIcon />} sx={{ marginTop: 2, marginLeft: 2 }}>
+                Видалити
+              </Button>
+            </Grid>
           ) : null}
           <Divider sx={{ marginY: 2 }} />
 
@@ -465,42 +465,42 @@ function ProjectView() {
           </Typography>
 
           {auth.role === 'DIRECTOR' || auth.role === 'MANAGER' ? (
-          <Root>
-            <div {...getRootProps()}>
-              <Label {...getInputLabelProps()}>Шукати користувача</Label>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <InputWrapper ref={setAnchorEl} className={focused ? 'focused' : ''}>
-                  {Array.isArray(value) && value.map((option, index) => (
-                    <StyledTag label={option.name} {...getTagProps({ index })} />
+            <Root>
+              <div {...getRootProps()}>
+                <Label {...getInputLabelProps()}>Шукати користувача</Label>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <InputWrapper ref={setAnchorEl} className={focused ? 'focused' : ''}>
+                    {Array.isArray(value) && value.map((option, index) => (
+                      <StyledTag label={option.name} {...getTagProps({ index })} />
+                    ))}
+                    <input {...getInputProps()} />
+                  </InputWrapper>
+                  <Button variant="contained" color="primary" onClick={handleAddUser} sx={{ marginLeft: 1 }}>
+                    Додати користувача
+                  </Button>
+                </Box>
+              </div>
+              {groupedOptions.length > 0 ? (
+                <Listbox {...getListboxProps()}>
+                  {groupedOptions.map((option, index) => (
+                    <li {...getOptionProps({ option, index })} key={option.id}>
+                      <span>{`${option.surname} ${option.name} | ${option.username}`}</span>
+                      <CheckIcon fontSize="small" />
+                    </li>
                   ))}
-                  <input {...getInputProps()} />
-                </InputWrapper>
-                <Button variant="contained" color="primary" onClick={handleAddUser} sx={{ marginLeft: 1 }}>
-                  Додати користувача
-                </Button>
-              </Box>
-            </div>
-            {groupedOptions.length > 0 ? (
-              <Listbox {...getListboxProps()}>
-                {groupedOptions.map((option, index) => (
-                  <li {...getOptionProps({ option, index })} key={option.id}>
-                    <span>{`${option.surname} ${option.name} | ${option.username}`}</span>
-                    <CheckIcon fontSize="small" />
-                  </li>
-                ))}
-              </Listbox>
-            ) : null}
-          </Root>
-        ) : null}
+                </Listbox>
+              ) : null}
+            </Root>
+          ) : null}
 
           <List>
             {projectUsers.map((user) => (
               <ListItem key={user.id}>
                 <ListItemText primary={`${user.surname} ${user.name} | ${user.username}`} />
                 {auth.role === 'DIRECTOR' || auth.role === 'MANAGER' ? (
-                <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteUser(user.id)}>
-                  <CloseIcon />
-                </IconButton>
+                  <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteUser(user.id)}>
+                    <CloseIcon />
+                  </IconButton>
                 ) : null}
               </ListItem>
             ))}
@@ -513,32 +513,32 @@ function ProjectView() {
           </Typography>
 
           {auth.role === 'DIRECTOR' || auth.role === 'MANAGER' ? (
-          <Root>
-            <div {...getMaterialRootProps()}>
-              <Label {...getMaterialInputLabelProps()}>Шукати матеріал</Label>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <InputWrapper ref={setMaterialAnchorEl} className={materialFocused ? 'focused' : ''}>
-                  {Array.isArray(materialValue) && materialValue.map((option, index) => (
-                    <StyledTag label={option.name} {...getMaterialTagProps({ index })} />
+            <Root>
+              <div {...getMaterialRootProps()}>
+                <Label {...getMaterialInputLabelProps()}>Шукати матеріал</Label>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <InputWrapper ref={setMaterialAnchorEl} className={materialFocused ? 'focused' : ''}>
+                    {Array.isArray(materialValue) && materialValue.map((option, index) => (
+                      <StyledTag label={option.name} {...getMaterialTagProps({ index })} />
+                    ))}
+                    <input {...getMaterialInputProps()} />
+                  </InputWrapper>
+                  <Button variant="contained" color="secondary" onClick={handleAddMaterial} sx={{ marginLeft: 1 }}>
+                    Додати матеріали
+                  </Button>
+                </Box>
+              </div>
+              {groupedMaterialOptions.length > 0 ? (
+                <Listbox {...getMaterialListboxProps()}>
+                  {groupedMaterialOptions.map((option, index) => (
+                    <li {...getMaterialOptionProps({ option, index })} key={option.id}>
+                      <span>{option.name}</span>
+                      <CheckIcon fontSize="small" />
+                    </li>
                   ))}
-                  <input {...getMaterialInputProps()} />
-                </InputWrapper>
-                <Button variant="contained" color="secondary" onClick={handleAddMaterial} sx={{ marginLeft: 1 }}>
-                  Додати матеріали
-                </Button>
-              </Box>
-            </div>
-            {groupedMaterialOptions.length > 0 ? (
-              <Listbox {...getMaterialListboxProps()}>
-                {groupedMaterialOptions.map((option, index) => (
-                  <li {...getMaterialOptionProps({ option, index })} key={option.id}>
-                    <span>{option.name}</span>
-                    <CheckIcon fontSize="small" />
-                  </li>
-                ))}
-              </Listbox>
-            ) : null}
-          </Root>
+                </Listbox>
+              ) : null}
+            </Root>
           ) : null}
           {selectedMaterial && (
             <Box sx={{ marginTop: 2 }}>
@@ -563,9 +563,9 @@ function ProjectView() {
                 <ListItemText primary={material.material.name} />
                 <ListItemText primary={`Кількість: ${material.amount}`} />
                 {auth.role === 'DIRECTOR' || auth.role === 'MANAGER' ? (
-                <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteMaterial(material.material.id)}>
-                  <CloseIcon />
-                </IconButton>
+                  <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteMaterial(material.material.id)}>
+                    <CloseIcon />
+                  </IconButton>
                 ) : null}
               </ListItem>
             ))}

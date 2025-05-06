@@ -24,7 +24,7 @@ function AddMaterial() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post(`${URL}/materials/add`, material)
+    axios.post(`${URL}/materials/add`, material, { withCredentials: true })
       .then(res => {
         console.log('Material added:', res.data);
         // Redirect to materials list page or show a success message

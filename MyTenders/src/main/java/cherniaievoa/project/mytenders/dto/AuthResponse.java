@@ -8,14 +8,11 @@ public class AuthResponse {
   private String surname;
   private String role;
 
-  private String JWToken;
-
-  public AuthResponse(String username, String name, String surname, String role, String JWToken) {
+  public AuthResponse(String username, String name, String surname, String role) {
     this.username = username;
     this.name = name;
     this.surname = surname;
     this.role = role;
-    this.JWToken = JWToken;
   }
 
   public AuthResponse(){}
@@ -52,12 +49,12 @@ public class AuthResponse {
     this.role = role;
   }
 
-  public String getJWToken() {
-    return JWToken;
-  }
-
-  public void setJWToken(String JWToken) {
-    this.JWToken = JWToken;
-  }
+//  public String getJWToken() {
+//    return JWToken;
+//  }
+//
+//  public void setJWToken(String JWToken) {
+//    this.JWToken = JWToken;
+//  }
 
 }

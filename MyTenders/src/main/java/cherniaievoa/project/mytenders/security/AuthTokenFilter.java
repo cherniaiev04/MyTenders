@@ -4,6 +4,7 @@ import cherniaievoa.project.mytenders.service.CustomUserDetailsService;
 import cherniaievoa.project.mytenders.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 );
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        request.setAttribute("username", username);
       }
     } catch (Exception e) {
       System.out.println("Cannot set user authentication: " + e);
@@ -51,9 +53,13 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     filterChain.doFilter(request, response);
   }
   private String parseJwt(HttpServletRequest request) {
-    String headerAuth = request.getHeader("Authorization");
-    if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
-      return headerAuth.substring(7);
+    Cookie[] cookies = request.getCookies();
+    if (cookies != null) {
+      for (Cookie cookie : cookies) {
+        if ("jwt".equals(cookie.getName())) {
+          return cookie.getValue();
+        }
+      }
     }
     return null;
   }

@@ -45,7 +45,7 @@ function ProvidersList() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get(URL + '/providers')
+    axios.get(URL + '/providers', { withCredentials: true })
       .then(res => {
         setProviders(res.data);
         setFilteredProviders(res.data);
@@ -128,12 +128,12 @@ function ProvidersList() {
 
   const handleDeleteProvider = (id) => {
     axios.delete(`${URL}/providers/${id}`)
-    .then(res => {
+      .then(res => {
         window.location.reload();
-    })
-    .catch(err => {
+      })
+      .catch(err => {
         console.error(err);
-    })
+      })
   }
 
   const handleClose = () => {
@@ -211,9 +211,9 @@ function ProvidersList() {
           />
         </Grid>
         <Grid item xs={12} md={3}>
-          <Button 
-            variant="contained" 
-            color="secondary" 
+          <Button
+            variant="contained"
+            color="secondary"
             onClick={handleAddProvider}
             size="small"
             fullWidth
@@ -225,9 +225,9 @@ function ProvidersList() {
       </Grid>
       <Grid container spacing={2} alignItems="center" sx={{ mt: 2 }}>
         <Grid item xs={12} md={4}>
-          <Button 
-            variant="contained" 
-            color="primary" 
+          <Button
+            variant="contained"
+            color="primary"
             onClick={() => handleSortChange('companyName')}
             size="small"
             fullWidth
@@ -237,9 +237,9 @@ function ProvidersList() {
           </Button>
         </Grid>
         <Grid item xs={12} md={4}>
-          <Button 
-            variant="contained" 
-            color="primary" 
+          <Button
+            variant="contained"
+            color="primary"
             onClick={() => handleSortChange('name')}
             size="small"
             fullWidth
@@ -249,9 +249,9 @@ function ProvidersList() {
           </Button>
         </Grid>
         <Grid item xs={12} md={4}>
-          <Button 
-            variant="contained" 
-            color="primary" 
+          <Button
+            variant="contained"
+            color="primary"
             onClick={() => handleSortChange('surname')}
             size="small"
             fullWidth
@@ -287,19 +287,19 @@ function ProvidersList() {
                 <TableCell>{provider.phone}</TableCell>
                 <TableCell>{provider.email}</TableCell>
                 <TableCell align="right">
-                  <Button 
-                    variant="contained" 
-                    color="primary" 
+                  <Button
+                    variant="contained"
+                    color="primary"
                     onClick={() => handleEditProvider(provider)}
                     size="small"
                     sx={{ mr: 1 }}
                   >
                     Редагувати
                   </Button>
-                  <Button 
-                    startIcon={<DeleteIcon />} 
-                    variant="contained" 
-                    color="error" 
+                  <Button
+                    startIcon={<DeleteIcon />}
+                    variant="contained"
+                    color="error"
                     onClick={() => handleDeleteProvider(provider.id)}
                     size="small"
                   >

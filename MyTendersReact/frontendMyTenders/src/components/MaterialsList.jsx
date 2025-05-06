@@ -40,19 +40,19 @@ function MaterialsList() {
     const fetchMaterials = async () => {
       try {
         const [materialsRes, materialsForProjectRes] = await Promise.all([
-          axios.get(URL + '/materials'),
-          axios.get(URL + '/materials/forProjects'),
+          axios.get(URL + '/materials', { withCredentials: true }),
+          axios.get(URL + '/materials/forProjects', { withCredentials: true }),
         ]);
-        
+
         setMaterials(materialsRes.data);
         setFilteredMaterials(materialsRes.data);
-        
+
         const data = materialsForProjectRes.data;
         const materialsArray = Object.keys(data).map(key => ({
           id: key,
           amount: data[key],
         }));
-        
+
         setMaterialsForProject(materialsArray);
       } catch (error) {
         console.error('Error fetching data', error);
@@ -125,7 +125,7 @@ function MaterialsList() {
   };
 
   const handleSave = () => {
-    if(newAmount >= 0) {
+    if (newAmount >= 0) {
       axios.put(`${URL}/materials/${selectedMaterial.id}`, { amount: newAmount })
         .then(res => {
           setMaterials(materials.map(material =>

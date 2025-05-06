@@ -20,8 +20,8 @@ import Box from '@mui/material/Box';
 import { useAuth } from '../context/AuthContext';
 
 function formatDate(dateString) {
-    const [year, month, day] = dateString.split('-');
-    return `${day}.${month}.${year}`;
+  const [year, month, day] = dateString.split('-');
+  return `${day}.${month}.${year}`;
 }
 
 
@@ -42,9 +42,11 @@ function ProjectsList() {
   const navigate = useNavigate();
 
   const { auth, setAuth } = useAuth();
-  const [ username, setUsername ] = useState(auth.username);
+  const [username, setUsername] = useState(auth.username);
   useEffect(() => {
-    axios.get(`${URL}/projects/user/${username}`)
+    axios.get(`${URL}/projects`, {
+      withCredentials: true,
+    })
       .then(res => {
         setProjects(res.data);
         setFilteredProjects(res.data);
@@ -52,7 +54,7 @@ function ProjectsList() {
       .catch(err => {
         console.error(err);
       });
-      setUsername(auth.username);
+    setUsername(auth.username);
   }, []);
 
   useEffect(() => {
@@ -80,19 +82,19 @@ function ProjectsList() {
     let filtered = [...projects];
 
     if (filter.name) {
-      filtered = filtered.filter(project => 
+      filtered = filtered.filter(project =>
         project.name.toLowerCase().includes(filter.name.toLowerCase())
       );
     }
 
     if (filter.numberOfProject) {
-      filtered = filtered.filter(project => 
+      filtered = filtered.filter(project =>
         project.numberOfProject.toLowerCase().includes(filter.numberOfProject.toLowerCase())
       );
     }
 
     if (filter.status) {
-      filtered = filtered.filter(project => 
+      filtered = filtered.filter(project =>
         project.status === filter.status
       );
     }
@@ -118,7 +120,7 @@ function ProjectsList() {
     navigate(`/projects/${id}`);
   }
 
-  
+
   return (
     <Box sx={{ padding: 3 }}>
       <Grid container spacing={2} alignItems="center">
@@ -162,22 +164,22 @@ function ProjectsList() {
           </FormControl>
         </Grid>
         {auth.role === 'DIRECTOR' || auth.role === 'MANAGER' ? (
-        <Grid item xs={12} md={3}>
-          <Button 
-            variant="contained" 
-            color="success" 
-            onClick={handleAddProject}
-            fullWidth
-            sx={{ height: '100%' }}
-          >
-            Додати новий тендер
-          </Button>
-        </Grid>
+          <Grid item xs={12} md={3}>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={handleAddProject}
+              fullWidth
+              sx={{ height: '100%' }}
+            >
+              Додати новий тендер
+            </Button>
+          </Grid>
         ) : null}
         <Grid item xs={12} md={6}>
-          <Button 
-            variant="contained" 
-            color="primary" 
+          <Button
+            variant="contained"
+            color="primary"
             onClick={() => handleSortChange('name')}
             fullWidth
             sx={{ height: '100%' }}
@@ -186,9 +188,9 @@ function ProjectsList() {
           </Button>
         </Grid>
         <Grid item xs={12} md={6}>
-          <Button 
-            variant="contained" 
-            color="primary" 
+          <Button
+            variant="contained"
+            color="primary"
             onClick={() => handleSortChange('date')}
             fullWidth
             sx={{ height: '100%' }}
@@ -220,7 +222,7 @@ function ProjectsList() {
                 <TableCell align="right">{project.numberOfProject}</TableCell>
                 <TableCell align="right">{statusMapping[project.status] || project.status}</TableCell>
                 <TableCell align="right">{formatDate(project.date)}</TableCell>
-                <TableCell align="center"> 
+                <TableCell align="center">
                   <Button color="primary" onClick={() => handleGetProject(project.id)}>
                     Більше інформації
                   </Button>

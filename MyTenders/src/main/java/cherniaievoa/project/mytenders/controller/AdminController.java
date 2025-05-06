@@ -5,12 +5,10 @@ import cherniaievoa.project.mytenders.entity.User;
 import cherniaievoa.project.mytenders.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @CrossOrigin
@@ -44,5 +42,10 @@ public class AdminController {
     userService.saveUser(newUser);
     user.setPassword("");
     return ResponseEntity.ok(user);
+  }
+
+  @GetMapping("/test")
+  public String adminOnly() {
+    return "This is for admins only";
   }
 }

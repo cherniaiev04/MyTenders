@@ -31,8 +31,8 @@ function AddProject() {
 
   const handleChangeStatus = (event, newAlignment) => {
     setAlignment(newAlignment);
-    const {name, value} = event.target;
-    setProject({...project, status: value});
+    const { name, value } = event.target;
+    setProject({ ...project, status: value });
   };
 
   const URL = import.meta.env.VITE_API_URL;
@@ -40,7 +40,7 @@ function AddProject() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post(URL + '/projects/add', project)
+    axios.post(URL + '/projects/add', project, { withCredentials: true })
       .then(res => {
         console.log(res.data);
         navigate('/projects')
@@ -103,18 +103,18 @@ function AddProject() {
           required
         />
         <ToggleButtonGroup
-        color="primary"
-        value={alignment}
-        exclusive
-        onChange={handleChangeStatus}
-        aria-label="Platform"
+          color="primary"
+          value={alignment}
+          exclusive
+          onChange={handleChangeStatus}
+          aria-label="Platform"
         >
-            <ToggleButton value="ACTIVE">Активний</ToggleButton>
-            <ToggleButton value="INACTIVE">Неактивний</ToggleButton>
-            <ToggleButton value="COMPLETED">Зроблений</ToggleButton>
-            <ToggleButton value="CANCELLED">Відміненний</ToggleButton>
+          <ToggleButton value="ACTIVE">Активний</ToggleButton>
+          <ToggleButton value="INACTIVE">Неактивний</ToggleButton>
+          <ToggleButton value="COMPLETED">Зроблений</ToggleButton>
+          <ToggleButton value="CANCELLED">Відміненний</ToggleButton>
         </ToggleButtonGroup>
-        <FormControlLabel control={<Checkbox />} label="Приймаєтся участь?"/>
+        <FormControlLabel control={<Checkbox />} label="Приймаєтся участь?" />
         <Button type="submit" variant="contained" color="primary">
           Додати
         </Button>

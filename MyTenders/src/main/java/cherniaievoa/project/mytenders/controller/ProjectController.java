@@ -6,6 +6,8 @@ import cherniaievoa.project.mytenders.entity.Project;
 import cherniaievoa.project.mytenders.entity.User;
 import cherniaievoa.project.mytenders.enums.Role;
 import cherniaievoa.project.mytenders.service.*;
+import cherniaievoa.project.mytenders.utils.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,11 +48,12 @@ public class ProjectController {
   }
 
   @GetMapping
-  public ResponseEntity<List<Project>> getAllProjects() {
-    List<Project> projects = projectService.getAllProjects();
-    projects.forEach(project -> project.setUsers(null));
-    System.out.println(projects);
-    return ResponseEntity.ok(projects);
+  public ResponseEntity<List<Project>> getAllProjects(HttpServletRequest request) {
+    String username = (String) request.getAttribute("username");
+    User user = userService.getUserByUsername(username);
+    List<Project> listOfProjects = user.getProjects().stream().toList();
+    listOfProjects.forEach(project -> project.setUsers(null));
+    return ResponseEntity.ok(listOfProjects);
   }
 
   @GetMapping("/user/{username}")
@@ -84,8 +87,9 @@ public class ProjectController {
 
   @GetMapping("/{id}/materials")
   public ResponseEntity<List<MaterialsForProject>> getMaterialsByProjectId(@PathVariable Long id) {
-    Optional<List<MaterialsForProject>> materials = Optional.of(materialsForProjectService.getMaterialsByProjectID(id));
-    return ResponseEntity.of(materials);
+    List<MaterialsForProject> materials = materialsForProjectService.getMaterialsByProjectID(id);
+    materials.forEach(materialsForProject -> materialsForProject.setProject(null));
+    return ResponseEntity.of(Optional.of(materials));
   }
 
   @PutMapping("/{id}/update")

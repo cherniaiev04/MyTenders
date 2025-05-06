@@ -20,10 +20,10 @@ function MaterialView() {
     const fetchMaterialData = async () => {
       try {
         const [materialRes, orderHistoryRes, usedAmountRes, providersRes] = await Promise.all([
-          axios.get(`${URL}/materials/${id}`),
-          axios.get(`${URL}/materials/${id}/orders`),
-          axios.get(`${URL}/materials/${id}/usedAmount`),
-          axios.get(`${URL}/providers`), // Fetch all providers
+          axios.get(`${URL}/materials/${id}`, { withCredentials: true }),
+          axios.get(`${URL}/materials/${id}/orders`, { withCredentials: true }),
+          axios.get(`${URL}/materials/${id}/usedAmount`, { withCredentials: true }),
+          axios.get(`${URL}/providers`, { withCredentials: true }), // Fetch all providers
         ]);
 
         setMaterial(materialRes.data);
@@ -63,7 +63,7 @@ function MaterialView() {
     try {
       let providerId = newOrder.providerId;
       if (isNewProvider) {
-        const newProviderRes = await axios.post(`${URL}/providers/add`, newProvider);
+        const newProviderRes = await axios.post(`${URL}/providers/add`, newProvider, { withCredentials: true });
         providerId = newProviderRes.data.id;
       }
 
@@ -76,12 +76,13 @@ function MaterialView() {
 
       await axios.post(`${URL}/materials/${id}/addOrder`, orderData, {
         params: { addToTotal: newOrder.addToTotal },
+        withCredentials: true,
       });
 
       // Fetch updated order history and material data
       const [orderHistoryRes, materialRes] = await Promise.all([
-        axios.get(`${URL}/materials/${id}/orders`),
-        axios.get(`${URL}/materials/${id}`),
+        axios.get(`${URL}/materials/${id}/orders`, { withCredentials: true }),
+        axios.get(`${URL}/materials/${id}`, { withCredentials: true }),
       ]);
 
       setOrderHistory(orderHistoryRes.data);
