@@ -122,116 +122,124 @@ function ProjectsList() {
 
 
   return (
-    <Box sx={{ padding: 3 }}>
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={12} md={3}>
-          <TextField
-            label="Назва"
-            name="name"
-            value={filter.name}
-            onChange={handleFilterChange}
-            variant="outlined"
-            fullWidth
-            sx={{ width: { xs: '100%', md: '100%' } }}
-          />
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <TextField
-            label="Номер проєкту"
-            name="numberOfProject"
-            value={filter.numberOfProject}
-            onChange={handleFilterChange}
-            variant="outlined"
-            fullWidth
-            sx={{ width: { xs: '100%', md: '100%' } }}
-          />
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <FormControl variant="outlined" fullWidth sx={{ width: { xs: '100%', md: '100%' } }}>
-            <InputLabel id="status-label">Статус</InputLabel>
-            <Select
-              labelId="status-label"
-              name="status"
-              value={filter.status}
-              onChange={handleFilterChange}
-              label="Статус"
-            >
-              <MenuItem value=""><em>None</em></MenuItem>
-              {Object.keys(statusMapping).map(key => (
-                <MenuItem key={key} value={key}>{statusMapping[key]}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        {auth.role === 'DIRECTOR' || auth.role === 'MANAGER' ? (
+    <Box sx={{ padding: 4, backgroundColor: '#f5f6f8', minHeight: '100vh' }}>
+      <Paper elevation={1} sx={{ padding: 3, marginBottom: 3 }}>
+        <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} md={3}>
-            <Button
-              variant="contained"
-              color="success"
-              onClick={handleAddProject}
+            <TextField
+              label="Назва"
+              name="name"
+              value={filter.name}
+              onChange={handleFilterChange}
+              variant="outlined"
+              size="small"
               fullWidth
-              sx={{ height: '100%' }}
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <TextField
+              label="Номер проєкту"
+              name="numberOfProject"
+              value={filter.numberOfProject}
+              onChange={handleFilterChange}
+              variant="outlined"
+              size="small"
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <FormControl variant="outlined" size="small" fullWidth>
+              <InputLabel id="status-label">Статус</InputLabel>
+              <Select
+                labelId="status-label"
+                name="status"
+                value={filter.status}
+                onChange={handleFilterChange}
+                label="Статус"
+              >
+                <MenuItem value=""><em>Всі</em></MenuItem>
+                {Object.keys(statusMapping).map(key => (
+                  <MenuItem key={key} value={key}>{statusMapping[key]}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          {(auth.role === 'DIRECTOR' || auth.role === 'MANAGER') && (
+            <Grid item xs={12} md={3}>
+              <Button
+                variant="outlined"
+                onClick={handleAddProject}
+                fullWidth
+                sx={{
+                  height: '100%',
+                  fontWeight: 500,
+                  borderRadius: '8px',
+                  textTransform: 'none'
+                }}
+              >
+                + Додати тендер
+              </Button>
+            </Grid>
+          )}
+
+          <Grid item xs={12} md={6}>
+            <Button
+              variant="outlined"
+              onClick={() => handleSortChange('name')}
+              fullWidth
+              sx={{ height: '100%', borderRadius: '8px' }}
             >
-              Додати новий тендер
+              Сортувати за назвою
             </Button>
           </Grid>
-        ) : null}
-        <Grid item xs={12} md={6}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => handleSortChange('name')}
-            fullWidth
-            sx={{ height: '100%' }}
-          >
-            Сортувати за назвою
-          </Button>
+          <Grid item xs={12} md={6}>
+            <Button
+              variant="outlined"
+              onClick={() => handleSortChange('date')}
+              fullWidth
+              sx={{ height: '100%', borderRadius: '8px' }}
+            >
+              Сортувати за датою
+            </Button>
+          </Grid>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => handleSortChange('date')}
-            fullWidth
-            sx={{ height: '100%' }}
-          >
-            Сортувати за датою
-          </Button>
-        </Grid>
-      </Grid>
-      <TableContainer component={Paper} sx={{ marginTop: 3 }}>
-        <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Назва</TableCell>
-              <TableCell align="right">Номер на сайті</TableCell>
-              <TableCell align="right">Статус</TableCell>
-              <TableCell align="right">Дата подачі</TableCell>
-              <TableCell align="center">Дії</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Array.isArray(filteredProjects) && filteredProjects.map((project) => (
-              <TableRow
-                key={project.id}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell component="th" scope="row">
-                  {project.name}
-                </TableCell>
-                <TableCell align="right">{project.numberOfProject}</TableCell>
-                <TableCell align="right">{statusMapping[project.status] || project.status}</TableCell>
-                <TableCell align="right">{formatDate(project.date)}</TableCell>
-                <TableCell align="center">
-                  <Button color="primary" onClick={() => handleGetProject(project.id)}>
-                    Більше інформації
-                  </Button>
-                </TableCell>
+      </Paper>
+
+      <Paper elevation={1}>
+        <TableContainer>
+          <Table sx={{ minWidth: 650 }} size="small">
+            <TableHead sx={{ backgroundColor: '#f0f0f0' }}>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 'bold' }}>Назва</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold' }}>Номер на сайті</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold' }}>Статус</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold' }}>Дата подачі</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Дії</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {Array.isArray(filteredProjects) && filteredProjects.map((project) => (
+                <TableRow key={project.id} hover>
+                  <TableCell>{project.name}</TableCell>
+                  <TableCell align="right">{project.numberOfProject}</TableCell>
+                  <TableCell align="right">{statusMapping[project.status] || project.status}</TableCell>
+                  <TableCell align="right">{formatDate(project.date)}</TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant="text"
+                      onClick={() => handleGetProject(project.id)}
+                      sx={{ textTransform: 'none', fontSize: '0.875rem' }}
+                    >
+                      Більше інформації
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
     </Box>
   );
 }

@@ -13,6 +13,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PropTypes from 'prop-types';
 import { useAuth } from '../context/AuthContext';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import DescriptionIcon from '@mui/icons-material/Description';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import TableChartIcon from '@mui/icons-material/TableChart'; // Excel
 
 const Root = styled('div')(
   ({ theme }) => `
@@ -20,6 +25,19 @@ const Root = styled('div')(
   font-size: 14px;
 `,
 );
+
+const getFileIcon = (filename) => {
+  const ext = filename.split('.').pop().toLowerCase();
+  switch (ext) {
+    case 'pdf': return <PictureAsPdfIcon color="error" sx={{ mr: 1 }} />;
+    case 'doc':
+    case 'docx': return <DescriptionIcon color="primary" sx={{ mr: 1 }} />;
+    case 'xls':
+    case 'xlsx': return <TableChartIcon color="success" sx={{ mr: 1 }} />;
+    default: return <InsertDriveFileIcon sx={{ mr: 1 }} />;
+  }
+};
+
 
 const Label = styled('label')`
   padding: 0 0 4px;
@@ -164,6 +182,8 @@ function ProjectView() {
   const [projectUsers, setProjectUsers] = useState([]);
   const [materials, setMaterials] = useState([]); // Initialize as an empty array
   const [allMaterials, setAllMaterials] = useState([]); // Initialize as an empty array
+  const [projectFiles, setProjectFiles] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
@@ -209,6 +229,13 @@ function ProjectView() {
       .catch(error => {
         console.error('Error fetching users:', error);
       });
+
+    axios.get(`${URL}/api/files/project/${id}`, { withCredentials: true })
+      .then(res => {
+        setProjectFiles(res.data); // ожидаем массив { id, filename }
+      })
+      .catch(err => console.error(err));
+
   }, [id]);
 
   const {
@@ -335,6 +362,40 @@ function ProjectView() {
       });
   };
 
+  const handleUploadFile = () => {
+    if (!selectedFile) return;
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    formData.append('projectId', id); // `id` берётся из useParams()
+
+    axios.post(`${URL}/api/files/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      withCredentials: true,
+    })
+      .then(res => {
+        console.log('Файл загружен:', res.data);
+        setSelectedFile(null);
+        // Подгружаем файлы заново:
+        return axios.get(`${URL}/api/files/project/${id}`, { withCredentials: true });
+      })
+      .then(res => {
+        setProjectFiles(res.data);
+      })
+      .catch(err => {
+        console.error('Ошибка при загрузке файла:', err);
+      });
+  };
+
+  const handleDeleteFile = (fileId) => {
+    axios.delete(`${URL}/api/files/${fileId}`, { withCredentials: true })
+      .then(() => {
+        setProjectFiles(prev => prev.filter(file => file.id !== fileId));
+      })
+      .catch(err => console.error('Ошибка при удалении файла:', err));
+  };
+
+
   const statusMapping = {
     ACTIVE: 'Активний',
     INACTIVE: 'Неактивний',
@@ -347,10 +408,10 @@ function ProjectView() {
   }
 
   return (
-    <Container>
-      <Box sx={{ padding: 2 }}>
-        <Paper elevation={3} sx={{ padding: 2 }}>
-          <Typography variant="h4" gutterBottom>
+    <Container sx={{ backgroundColor: '#f5f6f8', minHeight: '100vh', paddingY: 4 }}>
+      <Box sx={{ padding: { xs: 2, md: 4 } }}>
+        <Paper elevation={1} sx={{ padding: 3 }}>
+          <Typography variant="h4" gutterBottom sx={{ fontWeight: 700 }}>
             Інформація про проєкт
           </Typography>
           <Grid container spacing={2}>
@@ -364,6 +425,7 @@ function ProjectView() {
                 fullWidth
                 margin="normal"
                 disabled={!(auth.role === 'DIRECTOR' || auth.role === 'MANAGER')}
+                size="small"
               />
             </Grid>
             <Grid item xs={12}>
@@ -376,6 +438,7 @@ function ProjectView() {
                 fullWidth
                 margin="normal"
                 disabled={!(auth.role === 'DIRECTOR' || auth.role === 'MANAGER')}
+                size="small"
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -390,6 +453,7 @@ function ProjectView() {
                 margin="normal"
                 InputLabelProps={{ shrink: true }}
                 disabled={!(auth.role === 'DIRECTOR' || auth.role === 'MANAGER')}
+                size="small"
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -404,6 +468,7 @@ function ProjectView() {
                 fullWidth
                 margin="normal"
                 disabled={!(auth.role === 'DIRECTOR' || auth.role === 'MANAGER')}
+                size="small"
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -416,10 +481,9 @@ function ProjectView() {
                 fullWidth
                 margin="normal"
                 select
-                SelectProps={{
-                  native: true,
-                }}
+                SelectProps={{ native: true }}
                 disabled={!(auth.role === 'DIRECTOR')}
+                size="small"
               >
                 {Object.keys(statusMapping).map(key => (
                   <option key={key} value={key}>
@@ -438,33 +502,114 @@ function ProjectView() {
                 fullWidth
                 margin="normal"
                 select
-                SelectProps={{
-                  native: true,
-                }}
+                SelectProps={{ native: true }}
                 disabled={!(auth.role === 'DIRECTOR')}
+                size="small"
               >
                 <option value="true">Так</option>
                 <option value="false">Ні</option>
               </TextField>
             </Grid>
           </Grid>
-          {auth.role === 'DIRECTOR' || auth.role === 'MANAGER' ? (
-            <Grid>
-              <Button variant="contained" color="primary" onClick={saveProject} sx={{ marginTop: 2 }}>
+          {(auth.role === 'DIRECTOR' || auth.role === 'MANAGER') && (
+            <Grid sx={{ mt: 3, display: 'flex', gap: 2 }}>
+              <Button
+                variant="outlined"
+                onClick={saveProject}
+                sx={{
+                  flexGrow: 1,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  borderRadius: 2,
+                }}
+              >
                 Зберегти
               </Button>
-              <Button variant="contained" color="error" onClick={deleteProject} startIcon={<DeleteIcon />} sx={{ marginTop: 2, marginLeft: 2 }}>
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={deleteProject}
+                sx={{
+                  flexGrow: 1,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  borderRadius: 2,
+                }}
+              >
                 Видалити
               </Button>
             </Grid>
-          ) : null}
-          <Divider sx={{ marginY: 2 }} />
+          )}
 
-          <Typography variant="h5" gutterBottom>
+          <Divider sx={{ my: 4 }} />
+          <Box sx={{ my: 4 }}>
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+              Документи
+            </Typography>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} md={6}>
+                <input
+                  type="file"
+                  onChange={(e) => setSelectedFile(e.target.files[0])}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Button
+                  variant="contained"
+                  disabled={!selectedFile}
+                  onClick={handleUploadFile}
+                  sx={{ textTransform: 'none', fontWeight: 600 }}
+                >
+                  Завантажити
+                </Button>
+              </Grid>
+            </Grid>
+          </Box>
+
+          <List>
+            {projectFiles.map((file) => (
+              <ListItem
+                key={file.id}
+                sx={{ display: 'flex', alignItems: 'center', paddingY: 1 }}
+                secondaryAction={
+                  (auth.role === 'DIRECTOR' || auth.role === 'MANAGER') && (
+                    <IconButton edge="end" onClick={() => handleDeleteFile(file.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  )
+                }
+              >
+                {/* Иконка расширения */}
+                {getFileIcon(file.filename)}
+
+                {/* Название файла */}
+                <Typography sx={{ flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {file.filename}
+                </Typography>
+
+                {/* Кнопка-глаз */}
+                <IconButton
+                  component="a"
+                  href={`${URL}/api/files/download/${file.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ ml: 1 }}
+                >
+                  <VisibilityIcon />
+                </IconButton>
+              </ListItem>
+            ))}
+          </List>
+
+
+          <Divider sx={{ my: 4 }} />
+
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
             Користувачі, які мають доступ
           </Typography>
 
-          {auth.role === 'DIRECTOR' || auth.role === 'MANAGER' ? (
+          {(auth.role === 'DIRECTOR' || auth.role === 'MANAGER') && (
             <Root>
               <div {...getRootProps()}>
                 <Label {...getInputLabelProps()}>Шукати користувача</Label>
@@ -475,12 +620,16 @@ function ProjectView() {
                     ))}
                     <input {...getInputProps()} />
                   </InputWrapper>
-                  <Button variant="contained" color="primary" onClick={handleAddUser} sx={{ marginLeft: 1 }}>
+                  <Button
+                    variant="outlined"
+                    onClick={handleAddUser}
+                    sx={{ ml: 1, textTransform: 'none', fontWeight: 600 }}
+                  >
                     Додати користувача
                   </Button>
                 </Box>
               </div>
-              {groupedOptions.length > 0 ? (
+              {groupedOptions.length > 0 && (
                 <Listbox {...getListboxProps()}>
                   {groupedOptions.map((option, index) => (
                     <li {...getOptionProps({ option, index })} key={option.id}>
@@ -489,30 +638,31 @@ function ProjectView() {
                     </li>
                   ))}
                 </Listbox>
-              ) : null}
+              )}
             </Root>
-          ) : null}
+          )}
 
           <List>
             {projectUsers.map((user) => (
-              <ListItem key={user.id}>
-                <ListItemText primary={`${user.surname} ${user.name} | ${user.username}`} />
-                {auth.role === 'DIRECTOR' || auth.role === 'MANAGER' ? (
+              <ListItem key={user.id} secondaryAction={
+                (auth.role === 'DIRECTOR' || auth.role === 'MANAGER') && (
                   <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteUser(user.id)}>
                     <CloseIcon />
                   </IconButton>
-                ) : null}
+                )
+              }>
+                <ListItemText primary={`${user.surname} ${user.name} | ${user.username}`} />
               </ListItem>
             ))}
           </List>
 
-          <Divider sx={{ marginY: 2 }} />
+          <Divider sx={{ my: 4 }} />
 
-          <Typography variant="h5" gutterBottom>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
             Матеріали
           </Typography>
 
-          {auth.role === 'DIRECTOR' || auth.role === 'MANAGER' ? (
+          {(auth.role === 'DIRECTOR' || auth.role === 'MANAGER') && (
             <Root>
               <div {...getMaterialRootProps()}>
                 <Label {...getMaterialInputLabelProps()}>Шукати матеріал</Label>
@@ -523,12 +673,17 @@ function ProjectView() {
                     ))}
                     <input {...getMaterialInputProps()} />
                   </InputWrapper>
-                  <Button variant="contained" color="secondary" onClick={handleAddMaterial} sx={{ marginLeft: 1 }}>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={handleAddMaterial}
+                    sx={{ ml: 1, textTransform: 'none', fontWeight: 600 }}
+                  >
                     Додати матеріали
                   </Button>
                 </Box>
               </div>
-              {groupedMaterialOptions.length > 0 ? (
+              {groupedMaterialOptions.length > 0 && (
                 <Listbox {...getMaterialListboxProps()}>
                   {groupedMaterialOptions.map((option, index) => (
                     <li {...getMaterialOptionProps({ option, index })} key={option.id}>
@@ -537,12 +692,13 @@ function ProjectView() {
                     </li>
                   ))}
                 </Listbox>
-              ) : null}
+              )}
             </Root>
-          ) : null}
+          )}
+
           {selectedMaterial && (
-            <Box sx={{ marginTop: 2 }}>
-              <Typography variant="body1">
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
                 Кількість матеріалу: {selectedMaterial.amount}
               </Typography>
               <TextField
@@ -552,6 +708,7 @@ function ProjectView() {
                 value={materialAmount}
                 onChange={(e) => setMaterialAmount(e.target.value)}
                 fullWidth
+                size="small"
                 margin="normal"
               />
             </Box>
@@ -559,14 +716,20 @@ function ProjectView() {
 
           <List>
             {Array.isArray(materials) && materials.map((material) => (
-              <ListItem key={material.material.id}>
-                <ListItemText primary={material.material.name} />
-                <ListItemText primary={`Кількість: ${material.amount}`} />
-                {auth.role === 'DIRECTOR' || auth.role === 'MANAGER' ? (
-                  <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteMaterial(material.material.id)}>
-                    <CloseIcon />
-                  </IconButton>
-                ) : null}
+              <ListItem
+                key={material.material.id}
+                secondaryAction={
+                  (auth.role === 'DIRECTOR' || auth.role === 'MANAGER') && (
+                    <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteMaterial(material.material.id)}>
+                      <CloseIcon />
+                    </IconButton>
+                  )
+                }
+              >
+                <ListItemText
+                  primary={material.material.name}
+                  secondary={`Кількість: ${material.amount}`}
+                />
               </ListItem>
             ))}
           </List>

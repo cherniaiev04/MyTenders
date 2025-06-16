@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Checkbox, FormControlLabel, Autocomplete } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 function MaterialView() {
   const { id } = useParams();
@@ -93,44 +94,81 @@ function MaterialView() {
     }
   };
 
+  const handleDeleteOrder = async (orderId) => {
+    try {
+      await axios.delete(`${URL}/materials/deleteOrder/${orderId}`, { withCredentials: true });
+      setOrderHistory((prev) => prev.filter((order) => order.id !== orderId));
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      // Здесь можно добавить уведомление об ошибке для пользователя
+    }
+  };
+
   if (!material) {
     return <Typography>Loading...</Typography>;
   }
 
   return (
-    <Container>
-      <Box sx={{ padding: 2 }}>
-        <Paper elevation={3} sx={{ padding: 2 }}>
-          <Typography variant="h4" gutterBottom>
+    <Container sx={{ backgroundColor: '#f5f6f8', minHeight: '100vh', paddingY: 4 }}>
+      <Box sx={{ padding: { xs: 2, md: 4 } }}>
+        <Paper elevation={1} sx={{ padding: 3 }}>
+          <Typography variant="h4" gutterBottom sx={{ fontWeight: 700 }}>
             Інформація про матеріал
           </Typography>
-          <Typography variant="h6">Назва: {material.name}</Typography>
-          <Typography variant="h6">Тип: {material.type}</Typography>
-          <Typography variant="h6">Використовується: {usedAmount}</Typography>
-          <Typography variant="h6">Залишилось: {material.amount}</Typography>
+          <Typography variant="h6" sx={{ mt: 1 }}>
+            Назва: {material.name}
+          </Typography>
+          <Typography variant="h6" sx={{ mt: 1 }}>
+            Тип: {material.type}
+          </Typography>
+          <Typography variant="h6" sx={{ mt: 1 }}>
+            Використовується: {usedAmount}
+          </Typography>
+          <Typography variant="h6" sx={{ mt: 1, mb: 3 }}>
+            Залишилось: {material.amount}
+          </Typography>
 
-          <Button variant="contained" color="primary" onClick={handleDialogOpen} sx={{ marginTop: 2 }}>
+          <Button
+            variant="outlined"
+            onClick={handleDialogOpen}
+            sx={{ marginBottom: 3, textTransform: 'none', fontWeight: 600, borderRadius: 2 }}
+          >
             Додати нове замовлення
           </Button>
 
-          <Dialog open={openDialog} onClose={handleDialogClose}>
-            <DialogTitle>Додати нове замовлення</DialogTitle>
-            <DialogContent>
+          <Dialog
+            open={openDialog}
+            onClose={handleDialogClose}
+            PaperProps={{
+              sx: { borderRadius: 3, padding: 3, minWidth: { xs: '90%', sm: 450 } },
+            }}
+          >
+            <DialogTitle sx={{ fontWeight: 700, fontSize: '1.25rem', mb: 2 }}>
+              Додати нове замовлення
+            </DialogTitle>
+            <DialogContent dividers sx={{ pt: 0 }}>
               <Autocomplete
                 options={providers}
                 getOptionLabel={(option) => option.companyName}
                 onChange={(event, value) => setNewOrder({ ...newOrder, providerId: value ? value.id : '' })}
-                renderInput={(params) => <TextField {...params} label="Постачальник" variant="outlined" margin="normal" fullWidth />}
-                disabled={isNewProvider}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Постачальник"
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    size="small"
+                    disabled={isNewProvider}
+                  />
+                )}
               />
               <FormControlLabel
                 control={
-                  <Checkbox
-                    checked={isNewProvider}
-                    onChange={(event) => setIsNewProvider(event.target.checked)}
-                  />
+                  <Checkbox checked={isNewProvider} onChange={(e) => setIsNewProvider(e.target.checked)} />
                 }
                 label="Нова компанія"
+                sx={{ mt: 1 }}
               />
               {isNewProvider && (
                 <>
@@ -142,6 +180,7 @@ function MaterialView() {
                     onChange={handleInputChange}
                     fullWidth
                     margin="normal"
+                    size="small"
                     required
                   />
                   <TextField
@@ -152,6 +191,7 @@ function MaterialView() {
                     onChange={handleInputChange}
                     fullWidth
                     margin="normal"
+                    size="small"
                   />
                   <TextField
                     label="Прізвище"
@@ -161,6 +201,7 @@ function MaterialView() {
                     onChange={handleInputChange}
                     fullWidth
                     margin="normal"
+                    size="small"
                   />
                   <TextField
                     label="Телефон"
@@ -170,6 +211,7 @@ function MaterialView() {
                     onChange={handleInputChange}
                     fullWidth
                     margin="normal"
+                    size="small"
                   />
                   <TextField
                     label="Email"
@@ -179,6 +221,7 @@ function MaterialView() {
                     onChange={handleInputChange}
                     fullWidth
                     margin="normal"
+                    size="small"
                   />
                 </>
               )}
@@ -190,6 +233,7 @@ function MaterialView() {
                 onChange={handleInputChange}
                 fullWidth
                 margin="normal"
+                size="small"
                 required
               />
               <TextField
@@ -200,6 +244,7 @@ function MaterialView() {
                 onChange={handleInputChange}
                 fullWidth
                 margin="normal"
+                size="small"
                 required
               />
               <TextField
@@ -212,6 +257,7 @@ function MaterialView() {
                 fullWidth
                 margin="normal"
                 InputLabelProps={{ shrink: true }}
+                size="small"
                 required
               />
               <FormControlLabel
@@ -222,39 +268,74 @@ function MaterialView() {
                     name="addToTotal"
                   />
                 }
-                label="Додати кількість у замовленні до загальної кількость"
+                label="Додати кількість у замовленні до загальної кількість"
+                sx={{ mt: 1 }}
               />
             </DialogContent>
-            <DialogActions>
-              <Button onClick={handleDialogClose} color="secondary">
+            <DialogActions sx={{ px: 3, pb: 2 }}>
+              <Button
+                onClick={handleDialogClose}
+                sx={{
+                  textTransform: 'none',
+                  color: '#5A5A5A',
+                  fontWeight: 600,
+                  '&:hover': { backgroundColor: '#f0f0f0' },
+                }}
+              >
                 Скасувати
               </Button>
-              <Button onClick={handleNewOrderSubmit} color="primary">
+              <Button
+                onClick={handleNewOrderSubmit}
+                variant="contained"
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  backgroundColor: '#0a6ed1',
+                  '&:hover': { backgroundColor: '#095bb5' },
+                }}
+              >
                 Додати
               </Button>
             </DialogActions>
           </Dialog>
 
-          <Typography variant="h5" gutterBottom sx={{ marginTop: 3 }}>
+          <Typography variant="h5" gutterBottom sx={{ mt: 4, fontWeight: 600 }}>
             Історія замовлень
           </Typography>
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={{ mt: 2 }}>
             <Table sx={{ minWidth: 650 }} size="small" aria-label="order history table">
-              <TableHead>
+              <TableHead sx={{ backgroundColor: '#f0f0f0' }}>
                 <TableRow>
-                  <TableCell>Постачальник</TableCell>
-                  <TableCell align="right">Кількість</TableCell>
-                  <TableCell align="right">Ціна</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Постачальник</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                    Кількість
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                    Ціна
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                    Дії
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {orderHistory.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell component="th" scope="row">
-                      {order.provider.companyName}
-                    </TableCell>
+                  <TableRow key={order.id} hover>
+                    <TableCell component="th" scope="row">{order.provider.companyName}</TableCell>
                     <TableCell align="right">{order.amount}</TableCell>
                     <TableCell align="right">{order.price}</TableCell>
+                    <TableCell align="right">
+                      <Button
+                        startIcon={<DeleteIcon />}
+                        variant="outlined"
+                        color="error"
+                        size="small"
+                        onClick={() => handleDeleteOrder(order.id)}
+                        sx={{ textTransform: 'none' }}
+                      >
+                        Видалити
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

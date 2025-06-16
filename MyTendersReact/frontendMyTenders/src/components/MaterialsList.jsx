@@ -16,6 +16,8 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import FormControl from '@mui/material/FormControl';
 import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+
 
 function MaterialsList() {
   const [materials, setMaterials] = useState([]);
@@ -126,7 +128,7 @@ function MaterialsList() {
 
   const handleSave = () => {
     if (newAmount >= 0) {
-      axios.put(`${URL}/materials/${selectedMaterial.id}`, { amount: newAmount })
+      axios.put(`${URL}/materials/${selectedMaterial.id}`, { amount: newAmount }, { withCredentials: true })
         .then(res => {
           setMaterials(materials.map(material =>
             material.id === selectedMaterial.id ? { ...material, amount: newAmount } : material
@@ -148,86 +150,110 @@ function MaterialsList() {
   };
 
   return (
-    <div>
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={4}>
-          <TextField
-            label="Назва"
-            name="name"
-            value={filter.name}
-            onChange={handleFilterChange}
-            variant="outlined"
-            size="small"
-            fullWidth
-          />
+    <Box sx={{ backgroundColor: '#f5f6f8', minHeight: '100vh', padding: 4 }}>
+      <Paper elevation={1} sx={{ padding: 3, marginBottom: 3 }}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} md={4}>
+            <TextField
+              label="Назва"
+              name="name"
+              value={filter.name}
+              onChange={handleFilterChange}
+              variant="outlined"
+              size="small"
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <TextField
+              label="Тип"
+              name="type"
+              value={filter.type}
+              onChange={handleFilterChange}
+              variant="outlined"
+              size="small"
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Button
+              variant="outlined"
+              onClick={handleAddMaterial}
+              size="small"
+              fullWidth
+              sx={{ height: '100%', textTransform: 'none', fontWeight: 500 }}
+            >
+              + Додати матеріал
+            </Button>
+          </Grid>
         </Grid>
-        <Grid item xs={4}>
-          <TextField
-            label="Тип"
-            name="type"
-            value={filter.type}
-            onChange={handleFilterChange}
-            variant="outlined"
-            size="small"
-            fullWidth
-          />
-        </Grid>
-        <Grid item xs={4}>
+
+        <Box sx={{ marginTop: 2, display: 'flex', gap: 2 }}>
           <Button
-            variant="contained"
-            color="secondary"
-            onClick={handleAddMaterial}
+            variant="outlined"
+            onClick={() => handleSortChange('name')}
             size="small"
-            fullWidth
+            sx={{ textTransform: 'none' }}
           >
-            Додати матеріал
+            Сортувати за назвою
           </Button>
-        </Grid>
-      </Grid>
-      <Button variant="contained" color="primary" onClick={() => handleSortChange('name')} size="small" sx={{ mt: 2, mr: 1 }}>
-        Сортувати за назвою
-      </Button>
-      <Button variant="contained" color="primary" onClick={() => handleSortChange('amount')} size="small" sx={{ mt: 2 }}>
-        Сортувати за кількістю
-      </Button>
-      <TableContainer component={Paper} sx={{ mt: 2 }}>
-        <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Назва</TableCell>
-              <TableCell align="right">Тип</TableCell>
-              <TableCell align="right">Використовується</TableCell>
-              <TableCell align="right">Кількість</TableCell>
-              <TableCell align="center">Дії</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredMaterials.map((material) => (
-              <TableRow
-                key={material.id}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell component="th" scope="row">
-                  {material.name}
-                </TableCell>
-                <TableCell align="right">{material.type}</TableCell>
-                <TableCell align="right">{getUsedAmount(material.id)}</TableCell>
-                <TableCell align="right">{material.amount}</TableCell>
-                <TableCell align="center">
-                  <Button variant="contained" color="primary" onClick={() => handleClickOpen(material)} size="small">
-                    Змінити кількість
-                  </Button>
-                  <Button variant="contained" color="primary" onClick={() => handleGetHistory(material.id)} size="small" sx={{ ml: 1 }}>
-                    Історія
-                  </Button>
-                </TableCell>
+          <Button
+            variant="outlined"
+            onClick={() => handleSortChange('amount')}
+            size="small"
+            sx={{ textTransform: 'none' }}
+          >
+            Сортувати за кількістю
+          </Button>
+        </Box>
+      </Paper>
+
+      <Paper elevation={1}>
+        <TableContainer>
+          <Table size="small">
+            <TableHead sx={{ backgroundColor: '#f0f0f0' }}>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 'bold' }}>Назва</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold' }}>Тип</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold' }}>Використовується</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold' }}>Кількість</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Дії</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {filteredMaterials.map((material) => (
+                <TableRow key={material.id} hover>
+                  <TableCell>{material.name}</TableCell>
+                  <TableCell align="right">{material.type}</TableCell>
+                  <TableCell align="right">{getUsedAmount(material.id)}</TableCell>
+                  <TableCell align="right">{material.amount}</TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant="text"
+                      size="small"
+                      onClick={() => handleClickOpen(material)}
+                      sx={{ textTransform: 'none' }}
+                    >
+                      Змінити кількість
+                    </Button>
+                    <Button
+                      variant="text"
+                      size="small"
+                      onClick={() => handleGetHistory(material.id)}
+                      sx={{ textTransform: 'none', ml: 1 }}
+                    >
+                      Історія
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Змінити кількість</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 'bold' }}>Змінити кількість</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -235,20 +261,17 @@ function MaterialsList() {
             label="Нова кількість"
             type="number"
             fullWidth
+            variant="outlined"
             value={newAmount}
             onChange={(e) => setNewAmount(e.target.value)}
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Скасувати
-          </Button>
-          <Button onClick={handleSave} color="primary">
-            Зберегти
-          </Button>
+        <DialogActions sx={{ paddingX: 3, paddingBottom: 2 }}>
+          <Button onClick={handleClose} sx={{ textTransform: 'none' }}>Скасувати</Button>
+          <Button onClick={handleSave} sx={{ textTransform: 'none' }}>Зберегти</Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Box>
   );
 }
 
