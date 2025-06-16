@@ -15,4 +15,5 @@ public interface HistoryOfOrdersService {
   void deleteHistoryOfOrdersById(Long id);
   List<HistoryOfOrders> getHistoryOfOrdersByMaterial(Material material);
   List<HistoryOfOrders> getHistoryOfOrdersByProvder(Provider provider);
+  boolean existedById(Long id);
 }

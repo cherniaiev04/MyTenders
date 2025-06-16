@@ -114,4 +114,12 @@ public class MaterialControllers {
     return ResponseEntity.ok(historyOfOrdersService.saveHistoryOfOrders(historyOfOrders));
   }
 
+  @DeleteMapping("/deleteOrder/{id}")
+  public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
+    if (!historyOfOrdersService.existedById(id))
+      return ResponseEntity.notFound().build();
+
+    historyOfOrdersService.deleteHistoryOfOrdersById(id);
+    return ResponseEntity.noContent().build();
+  }
 }

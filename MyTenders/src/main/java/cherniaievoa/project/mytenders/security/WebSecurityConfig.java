@@ -74,7 +74,7 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(authorizeRequests ->
                     authorizeRequests
                             .requestMatchers("/admin/addUser", "/admin/test").hasRole("MANAGER") // Only ADMIN only
-                            .requestMatchers("/projects/add", "/projects", "/projects/{id}/**", "/materials", "/materials/**", "/providers/**").hasAnyAuthority("MANAGER", "DIRECTOR") // Access have only MANAGER or DIRECTOR role users
+                            .requestMatchers("/projects/add", "/projects", "/projects/{id}/**","/materials/**", "/providers/**").hasAnyAuthority("MANAGER", "DIRECTOR") // Access have only MANAGER or DIRECTOR role users
                             .requestMatchers("/login", "/api/test/all").permitAll() // Use 'requestMatchers' instead of 'antMatchers'
                             .anyRequest().authenticated()
             );

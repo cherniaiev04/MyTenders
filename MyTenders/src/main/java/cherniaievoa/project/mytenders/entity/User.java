@@ -1,6 +1,7 @@
 package cherniaievoa.project.mytenders.entity;
 
 import cherniaievoa.project.mytenders.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -88,6 +89,7 @@ public class User implements UserDetails {
     this.username = username;
   }
 
+  @JsonIgnore
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return List.of(new SimpleGrantedAuthority(getRole().getAuthority()));

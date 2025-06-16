@@ -67,4 +67,9 @@ public class HistoryOfOrdersServiceImpl implements HistoryOfOrdersService {
   public List<HistoryOfOrders> getHistoryOfOrdersByProvder(Provider provider) {
     return historyRepository.getHistoryOfOrdersByProvider(provider);
   }
+
+  @Override
+  public boolean existedById(Long id) {
+    return historyRepository.existsById(id);
+  }
 }
