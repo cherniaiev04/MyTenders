@@ -3,9 +3,7 @@
 **MyTenders** is a web applicagion designed to automate the processes that arise for companies that participate in tenders. Also its a bachelor thesis program.
 
 ## NOW IN UPDATING
-- Update a Design of Application by using Tailwind CSS.
 - Pack all in Docker
-- Update Security part
 
 ## Project Overview
 
@@ -17,7 +15,7 @@ The tool allows users to efficiently track, analyse and manage all aspects of te
 
 - Automation of accounting of tender processes in the company
 - Search, view and filter tenders
-- Tender documentation management (adding, viewing, deleting) (IN PROGRESS)
+- Tender documentation management (adding, viewing, deleting) 
 - Accounting of materials in the warehouse for tenders
 - Supplier management and order history
 - Management of users and their roles
